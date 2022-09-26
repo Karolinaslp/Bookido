@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class MemoryCatalogRepository implements CatalogRepository {
+class SchoolCatalogRepository implements CatalogRepository {
     private final Map<Long, Book> storage = new ConcurrentHashMap<>();
 
-    public MemoryCatalogRepository() {
-        storage.put(1L, new Book(1L, "Kukuczka", "Dariusz Kortko", 2016));
-        storage.put(2L, new Book(2L, "Cień Wiatru", "Carlos Luiz Zafón", 2005));
-        storage.put(3L, new Book(3L, "Java", "Cay S. Horstmann", 2016));
-        storage.put(4L, new Book(4L, "Wzorce Projektowe", "Eric Freeman", 2021));
+    public SchoolCatalogRepository() {
+        storage.put(1L, new Book(1L, "Granica", "Zofia Nałkowska", 1835));
+        storage.put(2L, new Book(2L, "Hamlet", "William Szekspir", 1602));
+        storage.put(3L, new Book(3L, "Chłopi", "Władysław Reymont", 1908));
+        storage.put(4L, new Book(4L, "Pan Wołodyjowski", "Henryk Sienkiewicz", 1888));
     }
 
     @Override
