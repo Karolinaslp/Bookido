@@ -14,10 +14,10 @@ public class MemoryCatalogRepository implements CatalogRepository {
     private final Map<Long, Book> storage = new ConcurrentHashMap<>();
 
     public MemoryCatalogRepository() {
-        storage.put(1L, new Book(1L, "Pan Tadeusz", "Adam Mickiewicz", 1834));
-        storage.put(2L, new Book(2L, "Ogmiem i Mieczem", "Henryk Sienkiewicz", 1884));
-        storage.put(3L, new Book(3L, "Chłopi", "Władysław Reymont", 1904));
-        storage.put(4L, new Book(4L, "Pan Wołodyjowski", "Henryk Sienkiewicz", 1894));
+        storage.put(1L, new Book(1L, "Kukuczka", "Dariusz Kortko", 2016));
+        storage.put(2L, new Book(2L, "Cień Wiatru", "Carlos Luiz Zafón", 2005));
+        storage.put(3L, new Book(3L, "Java", "Cay S. Horstmann", 2016));
+        storage.put(4L, new Book(4L, "Wzorce Projektowe", "Eric Freeman", 2021));
     }
 
     @Override
