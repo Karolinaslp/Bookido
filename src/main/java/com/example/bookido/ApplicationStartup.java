@@ -1,6 +1,7 @@
 package com.example.bookido;
 
-import com.example.bookido.catalog.application.CatalogController;
+import com.example.bookido.catalog.application.CatalogService;
+import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.domain.Book;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -10,20 +11,20 @@ import java.util.List;
 
 @Component
 public class ApplicationStartup implements CommandLineRunner {
-    private final CatalogController catalogController;
+    private final CatalogUseCase catalog;
     private final String title;
 
     public ApplicationStartup(
-            CatalogController catalogController,
+            CatalogService catalogController,
             @Value("${bookido.catalog.query:Java}") String title
     ) {
-        this.catalogController = catalogController;
+        this.catalog = catalogController;
         this.title = title;
     }
 
     @Override
     public void run(String... args) {
-        List<Book> bookList = catalogController.findByTitle(title);
+        List<Book> bookList = catalog.findByTitle(title);
         bookList.forEach(System.out::println);
     }
 }
