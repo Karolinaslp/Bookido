@@ -3,6 +3,7 @@ package com.example.bookido.catalog.application;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.catalog.domain.CatalogRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -11,12 +12,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class CatalogService implements CatalogUseCase {
     private final CatalogRepository repository;
-
-    public CatalogService(@Qualifier("bestsellerCatalogRepository") CatalogRepository repository) {
-        this.repository = repository;
-    }
 
     @Override
     public List<Book> findByTitle(String title) {
@@ -37,8 +35,9 @@ public class CatalogService implements CatalogUseCase {
     }
 
     @Override
-    public void addBook() {
-
+    public void addBook(CreateBookCommand command) {
+        Book book = new Book(command.getTitle(), command.getAuthor(), command.getYear());
+        repository.save(book);
     }
 
     @Override
