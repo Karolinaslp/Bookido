@@ -1,6 +1,7 @@
 package com.example.bookido.catalog.application.port;
 
 import com.example.bookido.catalog.domain.Book;
+import lombok.Value;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +13,16 @@ public interface CatalogUseCase {
 
     Optional<Book> findOneByTitleAndAuthor(String title, String author);
 
-    void addBook();
+    void addBook(CreateBookCommand command);
 
     void removeById(Long id);
 
     void updateBook();
+
+    @Value
+    class CreateBookCommand{
+        String title;
+        String author;
+        Integer year;
+    }
 }
