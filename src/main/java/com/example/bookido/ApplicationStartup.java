@@ -2,6 +2,7 @@ package com.example.bookido;
 
 import com.example.bookido.catalog.application.CatalogService;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
+import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import com.example.bookido.catalog.domain.Book;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -26,6 +27,8 @@ public class ApplicationStartup implements CommandLineRunner {
     public void run(String... args) {
         initData();
         findByTitle();
+        findAndUpdate();
+        findByTitle();
     }
 
     private void initData() {
@@ -44,5 +47,20 @@ public class ApplicationStartup implements CommandLineRunner {
     private void findByTitle() {
         List<Book> bookList = catalog.findByTitle(title);
         bookList.forEach(System.out::println);
+    }
+
+    private void findAndUpdate() {
+        System.out.println("Updating book...");
+        catalog.findOneByTitleAndAuthor("Harry", "J. K. Rowling")
+                .ifPresent(book -> {
+                    UpdateBookCommand command = new UpdateBookCommand(
+                            book.getId(),
+                            "Harry Potter i Komnata Tajemnic Xdd",
+                            book.getAuthor(),
+                            book.getYear()
+                    );
+                    catalog.updateBook(command);
+                });
+
     }
 }
