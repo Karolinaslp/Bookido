@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 class MemoryCatalogRepository implements CatalogRepository {
     private final Map<Long, Book> storage = new ConcurrentHashMap<>();
     private final AtomicLong ID_NEXT_VALUE = new AtomicLong(0L);
-    
+
     @Override
     public List<Book> findAll() {
         return new ArrayList<>(storage.values());
@@ -35,6 +35,11 @@ class MemoryCatalogRepository implements CatalogRepository {
     @Override
     public Optional<Book> findById(Long id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
+    public void removeById(Long id) {
+        storage.remove(id);
     }
 
     private long nextId() {
