@@ -3,6 +3,7 @@ package com.example.bookido;
 import com.example.bookido.catalog.application.CatalogService;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
+import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookResponse;
 import com.example.bookido.catalog.domain.Book;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -53,13 +54,13 @@ public class ApplicationStartup implements CommandLineRunner {
         System.out.println("Updating book...");
         catalog.findOneByTitleAndAuthor("Harry", "J. K. Rowling")
                 .ifPresent(book -> {
-                    UpdateBookCommand command = new UpdateBookCommand(
-                            book.getId(),
-                            "Harry Potter i Komnata Tajemnic Xdd",
-                            book.getAuthor(),
-                            book.getYear()
-                    );
-                    catalog.updateBook(command);
+                    final UpdateBookCommand command = UpdateBookCommand
+                            .builder()
+                            .id(book.getId())
+                            .title("Harry Potter i Komnata Tajemnic Xdd")
+                            .build();
+                    UpdateBookResponse response = catalog.updateBook(command);
+                    System.out.println("Updating book result: " + response.isSuccess());
                 });
 
     }
