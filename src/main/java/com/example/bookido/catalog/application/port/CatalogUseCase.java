@@ -1,6 +1,7 @@
 package com.example.bookido.catalog.application.port;
 
 import com.example.bookido.catalog.domain.Book;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.Collections;
@@ -29,11 +30,25 @@ public interface CatalogUseCase {
         Integer year;
     }
     @Value
+    @Builder
     class UpdateBookCommand {
         Long id;
         String title;
         String author;
         Integer year;
+
+        public Book updateFields(Book book) {
+            if (title != null) {
+                book.setTitle(title);
+            }
+            if (author != null) {
+                book.setAuthor(author);
+            }
+            if (year != null) {
+                book.setYear(year);
+            }
+            return  book;
+        }
     }
 
     @Value
