@@ -49,9 +49,7 @@ public class CatalogService implements CatalogUseCase {
         return repository
                 .findById(command.getId())
                 .map(book -> {
-                    book.setTitle(command.getTitle());
-                    book.setYear(command.getYear());
-                    book.setAuthor(command.getAuthor());
+                    Book updateBook = command.updateFields(book);
                     repository.save(book);
                     return UpdateBookResponse.SUCCESS;
                 })
@@ -60,7 +58,7 @@ public class CatalogService implements CatalogUseCase {
 
     @Override
     public void removeById(Long id) {
-
+        repository.removeById(id);
     }
 }
 
