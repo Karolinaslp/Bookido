@@ -1,19 +1,25 @@
 package com.example.bookido.catalog.application.port;
 
 import com.example.bookido.catalog.domain.Book;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 
 public interface CatalogUseCase {
+    List<Book> findAll();
+
     List<Book> findByTitle(String title);
 
-    List<Book> findAll();
+    Optional<Book> findOneByTitle(String title);
 
     Optional<Book> findOneByTitleAndAuthor(String title, String author);
 
@@ -24,11 +30,17 @@ public interface CatalogUseCase {
     void removeById(Long id);
 
     @Value
-    class CreateBookCommand{
+    class CreateBookCommand {
         String title;
         String author;
         Integer year;
+        BigDecimal price;
+
+        public Book toBook() {
+            return new Book(title, author, year, price);
+        }
     }
+
     @Value
     @Builder
     class UpdateBookCommand {
@@ -36,7 +48,6 @@ public interface CatalogUseCase {
         String title;
         String author;
         Integer year;
-
         public Book updateFields(Book book) {
             if (title != null) {
                 book.setTitle(title);
@@ -47,14 +58,15 @@ public interface CatalogUseCase {
             if (year != null) {
                 book.setYear(year);
             }
-            return  book;
+            return book;
         }
     }
 
     @Value
     class UpdateBookResponse {
-        public static UpdateBookResponse SUCCESS = new UpdateBookResponse(true, emptyList());
         boolean success;
         List<String> errors;
+
+        public static UpdateBookResponse SUCCESS = new UpdateBookResponse(true, emptyList());
     }
 }
