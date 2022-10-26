@@ -1,7 +1,7 @@
 package com.example.bookido.catalog.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @ToString
+@RequiredArgsConstructor
 public class Book {
   private Long id;
   private String title;
@@ -24,5 +24,5 @@ public class Book {
     this.year = year;
     this.price = price;
   }
-}
 
+}
