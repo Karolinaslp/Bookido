@@ -6,7 +6,7 @@ import com.example.bookido.catalog.domain.CatalogRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class CatalogService implements CatalogUseCase {
+
     private final CatalogRepository repository;
 
     @Override
@@ -30,6 +31,14 @@ public class CatalogService implements CatalogUseCase {
     }
 
     @Override
+    public Optional<Book> findOneByTitle(String title) {
+        return repository.findAll()
+                .stream()
+                .filter(book -> book.getTitle().startsWith(title))
+                .findFirst();
+    }
+
+    @Override
     public Optional<Book> findOneByTitleAndAuthor(String title, String author) {
         return repository.findAll()
                 .stream()
@@ -40,7 +49,7 @@ public class CatalogService implements CatalogUseCase {
 
     @Override
     public void addBook(CreateBookCommand command) {
-        Book book = new Book(command.getTitle(), command.getAuthor(), command.getYear());
+        Book book = command.toBook();
         repository.save(book);
     }
 
@@ -49,11 +58,11 @@ public class CatalogService implements CatalogUseCase {
         return repository
                 .findById(command.getId())
                 .map(book -> {
-                    Book updateBook = command.updateFields(book);
-                    repository.save(book);
+                    Book updatedBook = command.updateFields(book);
+                    repository.save(updatedBook);
                     return UpdateBookResponse.SUCCESS;
                 })
-                .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with id: " + command.getId())));
+                .orElseGet(() -> new UpdateBookResponse(false, Collections.singletonList("Book not found with id: " + command.getId())));
     }
 
     @Override
