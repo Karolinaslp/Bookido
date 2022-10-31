@@ -1,6 +1,5 @@
 package com.example.bookido;
-
-import com.example.bookido.catalog.application.CatalogService;
+;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookResponse;
