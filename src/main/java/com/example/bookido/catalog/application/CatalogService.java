@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class CatalogService implements CatalogUseCase {
+class CatalogService implements CatalogUseCase {
 
     private final CatalogRepository repository;
 
