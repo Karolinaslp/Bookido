@@ -3,15 +3,19 @@ package com.example.bookido.catalog.web;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.domain.Book;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-@RequestMapping("/catalog")
+import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
+
+@RequestMapping("catalog")
 @RestController
 @AllArgsConstructor
 class CatalogController {
@@ -39,5 +43,23 @@ class CatalogController {
                 .findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public void addBook(@RequestBody RestCreateBookCommand command) {
+        catalog.addBook(command.toCommand());
+    }
+
+    @Data
+    private static class RestCreateBookCommand {
+        private String title;
+        private String author;
+        private Integer year;
+        private BigDecimal price;
+
+        CreateBookCommand toCommand() {
+            return new CreateBookCommand(title, author, year, price);
+
+        }
     }
 }
