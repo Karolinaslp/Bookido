@@ -7,9 +7,11 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,8 +48,14 @@ class CatalogController {
     }
 
     @PostMapping
-    public void addBook(@RequestBody RestCreateBookCommand command) {
-        catalog.addBook(command.toCommand());
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Void> addBook(@RequestBody RestCreateBookCommand command) {
+        Book book = catalog.addBook(command.toCommand());
+        return ResponseEntity.created(createdBookUri(book)).build();
+    }
+
+    private URI createdBookUri(Book book) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/" + book.getId().toString()).build().toUri();
     }
 
     @Data
@@ -59,7 +67,6 @@ class CatalogController {
 
         CreateBookCommand toCommand() {
             return new CreateBookCommand(title, author, year, price);
-
         }
     }
 }
