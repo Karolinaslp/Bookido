@@ -22,7 +22,7 @@ class MemoryCatalogRepository implements CatalogRepository {
     }
 
     @Override
-    public void save(Book book) {
+    public Book save(Book book) {
         if (book.getId() != null) {
             storage.put(book.getId(), book);
         } else {
@@ -30,6 +30,7 @@ class MemoryCatalogRepository implements CatalogRepository {
             book.setId(nextId);
             storage.put(nextId, book);
         }
+        return book;
     }
 
     @Override
