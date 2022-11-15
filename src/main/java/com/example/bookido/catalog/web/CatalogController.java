@@ -4,9 +4,9 @@ import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.domain.Book;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -17,8 +17,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 
@@ -71,10 +71,10 @@ class CatalogController {
 
     @Data
     private static class RestCreateBookCommand {
-        @NotBlank
+        @NotBlank(message = "Please provide a title")
         private String title;
 
-        @NotBlank
+        @NotBlank(message = "Please provide an author")
         private String author;
 
         @NotNull
