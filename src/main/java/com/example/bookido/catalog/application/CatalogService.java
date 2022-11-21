@@ -6,6 +6,7 @@ import com.example.bookido.catalog.domain.CatalogRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +92,16 @@ class CatalogService implements CatalogUseCase {
     @Override
     public void removeById(Long id) {
         repository.removeById(id);
+    }
+
+    @Override
+    public void updateBookCover(UpdateBookCoverCommand command) {
+        int length = command.getFile().length;
+        System.out.println("Received cover command: " + command.getFileName() + " bytes: " + length);
+        repository.findById(command.getId())
+                .ifPresent(book -> {
+//                    book.setCoverId();
+                });
     }
 }
 
