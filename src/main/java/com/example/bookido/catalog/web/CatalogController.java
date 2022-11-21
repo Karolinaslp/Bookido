@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 
@@ -52,10 +51,20 @@ class CatalogController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void updateBook(@PathVariable Long id, @RequestBody RestBookCommand command) {
+        UpdateBookResponse response = catalog.updateBook(command.toUpdateBookCommand(id));
+        if (!response.isSuccess()) {
+            String message = String.join(", ", response.getErrors());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        }
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Void> addBook(@Valid @RequestBody RestCreateBookCommand command) {
-        Book book = catalog.addBook(command.toCommand());
+    public ResponseEntity<Void> addBook(@Valid @RequestBody RestBookCommand command) {
+        Book book = catalog.addBook(command.toCreateCommand());
         return ResponseEntity.created(createdBookUri(book)).build();
     }
 
@@ -70,7 +79,7 @@ class CatalogController {
     }
 
     @Data
-    private static class RestCreateBookCommand {
+    private static class RestBookCommand {
         @NotBlank(message = "Please provide a title")
         private String title;
 
@@ -84,8 +93,12 @@ class CatalogController {
         @DecimalMin("0.00")
         private BigDecimal price;
 
-        CreateBookCommand toCommand() {
+        CreateBookCommand toCreateCommand() {
             return new CreateBookCommand(title, author, year, price);
+        }
+
+        UpdateBookCommand toUpdateBookCommand(Long id) {
+            return new UpdateBookCommand(id, title, author, year, price);
         }
     }
 }
