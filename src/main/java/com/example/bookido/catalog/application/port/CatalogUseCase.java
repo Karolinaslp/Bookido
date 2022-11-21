@@ -33,6 +33,16 @@ public interface CatalogUseCase {
 
     void removeById(Long id);
 
+    void updateBookCover(UpdateBookCoverCommand command);
+
+    @Value
+    class UpdateBookCoverCommand {
+        Long id;
+        byte[] file;
+        String contentType;
+        String fileName;
+    }
+
     @Value
     class CreateBookCommand {
         String title;
