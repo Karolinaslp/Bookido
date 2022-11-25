@@ -2,9 +2,11 @@ package com.example.bookido.catalog.web;
 
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.domain.Book;
+import com.example.bookido.web.CreatedURI;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,7 +65,7 @@ class CatalogController {
         }
     }
 
-    @PutMapping("/{id}/cover")
+    @PutMapping(value = "/{id}/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void addBookCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
         System.out.println("Got file: " + file.getOriginalFilename());
@@ -95,7 +97,7 @@ class CatalogController {
     }
 
     private URI createdBookUri(Book book) {
-        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/" + book.getId().toString()).build().toUri();
+        return new CreatedURI("/" + book.getId().toString()).uri();
     }
 
     @Data
