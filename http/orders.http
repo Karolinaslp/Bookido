@@ -1,0 +1,27 @@
+###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+    "items": [
+      {
+        "bookId": 0;
+        "quantity": 2
+      },
+      {
+        "bookId": 1,
+        "quantity": 1
+      }
+    ],
+    "recipient": {
+        "name": "Karolina Rejowska",
+        "phone": "123-123-123",
+        "street": "Narutowicza 24",
+        "city": "Lodz",
+        "zipCode": "12-123",
+        "email": "rejowskakarolina@gmail.com"
+    }
+}
+
+###
+GET http://localhost:8080/orders/2
