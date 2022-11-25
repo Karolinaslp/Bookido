@@ -4,9 +4,7 @@ import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookResponse;
 import com.example.bookido.catalog.domain.Book;
-import com.example.bookido.order.applocation.port.PlaceOrderUseCase;
-import com.example.bookido.order.applocation.port.PlaceOrderUseCase.PlaceOrderCommand;
-import com.example.bookido.order.applocation.port.PlaceOrderUseCase.PlaceOrderResponse;
+import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
 import com.example.bookido.order.applocation.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.OrderItem;
 import com.example.bookido.order.domain.Recipient;
@@ -17,18 +15,20 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.example.bookido.order.applocation.port.ManipulateOrderUseCase.*;
+
 @Component
 public class ApplicationStartup implements CommandLineRunner {
 
     private final CatalogUseCase catalog;
-    private final PlaceOrderUseCase placeOrder;
+    private final ManipulateOrderUseCase placeOrder;
     private final QueryOrderUseCase queryOrder;
     private final String title;
     private final Long limit;
 
     public ApplicationStartup(
             CatalogUseCase catalog,
-            PlaceOrderUseCase placeOrder,
+            ManipulateOrderUseCase placeOrder,
             QueryOrderUseCase queryOrder,
             @Value("Harry") String title,
             @Value("1") Long limit
@@ -68,18 +68,19 @@ public class ApplicationStartup implements CommandLineRunner {
         // place order command
         PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
-                .recipient(null)
-                .item(new OrderItem(harryPotter, 16))
-                .item(new OrderItem(wzorce, 7))
+                .recipient(recipient)
+                .item(new OrderItem(harryPotter.getId(), 16))
+                .item(new OrderItem(wzorce.getId(), 7))
                 .build();
 
         PlaceOrderResponse response = placeOrder.placeOrder(command);
-        System.out.println("Created ORDER with id: " + response.getOrderId());
+        String result = response.handle(
+                orderId -> "Creates ORDER with id: " + orderId,
+                error -> "Failed to create order: " + error
+        );
         // list all orders
         queryOrder.findAll()
-                .forEach(order -> {
-                    System.out.println("GOT ORDER WITH TOTAL PRICE: " + order.totalPrice() + " DETAILS: " + order);
-                });
+                .forEach(order -> System.out.println("GOT ORDER WITH TOTAL PRICE: " + order.totalPrice() + " DETAILS: " + order));
 
     }
 
