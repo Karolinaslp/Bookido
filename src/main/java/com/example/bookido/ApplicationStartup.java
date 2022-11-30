@@ -1,5 +1,5 @@
 package com.example.bookido;
-;
+
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookResponse;
@@ -30,8 +30,8 @@ public class ApplicationStartup implements CommandLineRunner {
             CatalogUseCase catalog,
             ManipulateOrderUseCase placeOrder,
             QueryOrderUseCase queryOrder,
-            @Value("Harry") String title,
-            @Value("1") Long limit
+            @Value("${bookido.catalog.query}") String title,
+            @Value("${bookigo.catalog.limit}") Long limit
     ) {
         this.catalog = catalog;
         this.placeOrder = placeOrder;
