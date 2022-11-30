@@ -1,0 +1,13 @@
+version: '20.10.21'
+
+services:
+  db:
+    container_name: bookidodb
+    image: postgres:12.4 //6.10
+    restart: always
+    environment:
+      POSTGRES_DB: bookido
+      POSTHRES_USER: admin
+      POSTGRES_PASSWORD: qwerty
+    ports:
+      - 7432:5432
