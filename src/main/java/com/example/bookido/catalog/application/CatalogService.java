@@ -1,8 +1,8 @@
 package com.example.bookido.catalog.application;
 
 import com.example.bookido.catalog.application.port.CatalogUseCase;
+import com.example.bookido.catalog.db.BookJpaRepository;
 import com.example.bookido.catalog.domain.Book;
-import com.example.bookido.catalog.domain.CatalogRepository;
 import com.example.bookido.uploads.application.ports.UploadUseCase;
 import com.example.bookido.uploads.domain.Upload;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import static com.example.bookido.uploads.application.ports.UploadUseCase.*;
 @AllArgsConstructor
 class CatalogService implements CatalogUseCase {
 
-    private final CatalogRepository repository;
+    private final BookJpaRepository repository;
     private final UploadUseCase upload;
 
     @Override
@@ -95,7 +95,7 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public void removeById(Long id) {
-        repository.removeById(id);
+        repository.deleteById(id);
     }
 
     @Override
