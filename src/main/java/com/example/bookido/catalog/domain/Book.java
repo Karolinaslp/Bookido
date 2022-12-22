@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.math.BigDecimal;
 
@@ -15,19 +16,19 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @Entity
 public class Book {
-  @Id
-  private Long id;
-  private String title;
-  private String author;
-  private Integer year;
-  private BigDecimal price;
-  private String coverId;
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String title;
+    private String author;
+    private Integer year;
+    private BigDecimal price;
+    private Long coverId;
 
-  public Book(String title, String author, Integer year, BigDecimal price) {
-    this.title = title;
-    this.author = author;
-    this.year = year;
-    this.price = price;
-  }
-
+    public Book(String title, String author, Integer year, BigDecimal price) {
+        this.title = title;
+        this.author = author;
+        this.year = year;
+        this.price = price;
+    }
 }
