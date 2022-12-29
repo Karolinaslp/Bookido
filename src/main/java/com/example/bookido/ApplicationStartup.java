@@ -3,59 +3,48 @@ package com.example.bookido;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookResponse;
+import com.example.bookido.catalog.db.AuthorJpaRepository;
+import com.example.bookido.catalog.domain.Author;
 import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
 import com.example.bookido.order.applocation.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.OrderItem;
 import com.example.bookido.order.domain.Recipient;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
+import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 import static com.example.bookido.order.applocation.port.ManipulateOrderUseCase.*;
 
 @Component
+@AllArgsConstructor
 public class ApplicationStartup implements CommandLineRunner {
 
     private final CatalogUseCase catalog;
     private final ManipulateOrderUseCase placeOrder;
     private final QueryOrderUseCase queryOrder;
-    private final String title;
-    private final Long limit;
-
-    public ApplicationStartup(
-            CatalogUseCase catalog,
-            ManipulateOrderUseCase placeOrder,
-            QueryOrderUseCase queryOrder,
-            @Value("${bookido.catalog.query}") String title,
-            @Value("${bookigo.catalog.limit}") Long limit
-    ) {
-        this.catalog = catalog;
-        this.placeOrder = placeOrder;
-        this.queryOrder = queryOrder;
-        this.title = title;
-        this.limit = limit;
-    }
+    private final AuthorJpaRepository authorRepository;
 
     @Override
     public void run(String... args) {
         initData();
-        searchCatalog();
         placeOrder();
     }
 
     private void placeOrder() {
-        // find harry potter
-        Book harryPotter = catalog.findOneByTitle("Harry Potter")
+
+        Book effectiveJava = catalog.findOneByTitle("Effective Java")
                 .orElseThrow(() -> new IllegalStateException("Cannot find a book"));
 
-        // find wzorce projektowe
-        Book wzorce = catalog.findOneByTitle("Wzorce Projektowe")
+        Book puzzlers = catalog.findOneByTitle("Java Puzzlers")
                 .orElseThrow(() -> new IllegalStateException("Cannot find a book"));
-        // create recepient
+
         Recipient recipient = Recipient
                 .builder()
                 .name("Jan Kowalski")
@@ -65,12 +54,12 @@ public class ApplicationStartup implements CommandLineRunner {
                 .zipCode("30-150")
                 .email("jan@example.org")
                 .build();
-        // place order command
+
         PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
                 .recipient(recipient)
-                .item(new OrderItem(harryPotter.getId(), 16))
-                .item(new OrderItem(wzorce.getId(), 7))
+                .item(new OrderItem(effectiveJava.getId(), 16))
+                .item(new OrderItem(puzzlers.getId(), 7))
                 .build();
 
         PlaceOrderResponse response = placeOrder.placeOrder(command);
@@ -84,42 +73,54 @@ public class ApplicationStartup implements CommandLineRunner {
 
     }
 
-    private void searchCatalog() {
-        findByTitle();
-        findAndUpdate();
-        findByTitle();
-    }
-
     private void initData() {
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Granica", "Zofia Nałkowska", 1835, new BigDecimal("12.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Hamlet", "William Szekspir", 1602, new BigDecimal("15.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Chłopi", "Władysław Reymont", 1908, new BigDecimal("23.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Pan Wołodyjowski", "Henryk Sienkiewicz", 1888, new BigDecimal("16.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Kukuczka", "Dariusz Kortko", 2016, new BigDecimal("55.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Cień Wiatru", "Carlos Luiz Zafón", 2005, new BigDecimal("26.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Java", "Cay S. Horstmann", 2016, new BigDecimal("22.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Wzorce Projektowe", "Eric Freeman", 2021, new BigDecimal("7.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Harry Potter i Komnata Tajemnic", "J. K. Rowling", 1998, new BigDecimal("33.90")));
-        catalog.addBook(new CatalogUseCase.CreateBookCommand("Ostatnie Zyczenie", "Andrzej Sapkowski", 2014, new BigDecimal("45.90")));
-    }
+        Author joshua = new Author("Joshua", "Bloch");
+        Author neal = new Author("Neal", "Gafter");
+        authorRepository.save(joshua);
+        authorRepository.save(neal);
 
-    private void findByTitle() {
-        List<Book> bookList = catalog.findByTitle(title);
-        bookList.forEach(System.out::println);
-    }
+        CreateBookCommand effectiveJava = new CreateBookCommand(
+                "Effective Java",
+                Set.of(joshua.getId()),
+                2005,
+                new BigDecimal("89.00")
+        );
+        CreateBookCommand wzorceProjektowe = new CreateBookCommand(
+                "Wzorce Projektowe", Set.of(),
+                2021,
+                new BigDecimal("109.00")
+        );
 
-    private void findAndUpdate() {
-        System.out.println("Updating book...");
-        catalog.findOneByTitleAndAuthor("Harry", "J. K. Rowling")
-                .ifPresent(book -> {
-                    final UpdateBookCommand command = UpdateBookCommand
-                            .builder()
-                            .id(book.getId())
-                            .title("Harry Potter i Komnata Tajemnic Xdd")
-                            .build();
-                    UpdateBookResponse response = catalog.updateBook(command);
-                    System.out.println("Updating book result: " + response.isSuccess());
-                });
+        CreateBookCommand java = new CreateBookCommand(
+                "Java",
+                Set.of(),
+                2016,
+                new BigDecimal("22.90")
+        );
+        CreateBookCommand javaPrzewodnikDlaPoczatkujacych = new CreateBookCommand(
+                "Java Przewodnik dla początkujących",
+                Set.of(),
+                2020,
+                new BigDecimal("89.00")
+        );
+        CreateBookCommand algorytmy = new CreateBookCommand(
+                "algorytrmy",
+                Set.of(),
+                2016,
+                new BigDecimal("67.00")
+        );
+        CreateBookCommand javaPuzzlers = new CreateBookCommand(
+                "Java Puzzlers",
+                Set.of(joshua.getId(), neal.getId()),
+                2018,
+                new BigDecimal("99.00")
+        );
 
+        catalog.addBook(effectiveJava);
+        catalog.addBook(wzorceProjektowe);
+        catalog.addBook(java);
+        catalog.addBook(javaPrzewodnikDlaPoczatkujacych);
+        catalog.addBook(algorytmy);
+        catalog.addBook(javaPuzzlers);
     }
 }
