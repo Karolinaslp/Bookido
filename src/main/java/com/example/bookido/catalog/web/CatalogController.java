@@ -11,22 +11,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 
-@RequestMapping("catalog")
 @RestController
+@RequestMapping("catalog")
 @AllArgsConstructor
 class CatalogController {
     private final CatalogUseCase catalog;
@@ -100,14 +101,13 @@ class CatalogController {
         return new CreatedURI("/" + book.getId().toString()).uri();
     }
 
-    @Data
+   @Data
     private static class RestBookCommand {
         @NotBlank(message = "Please provide a title")
         private String title;
 
-        @NotBlank(message = "Please provide an author")
-        private String author;
-
+        @NotEmpty
+        private Set<Long> authors;
         @NotNull
         private Integer year;
 
@@ -116,11 +116,11 @@ class CatalogController {
         private BigDecimal price;
 
         CreateBookCommand toCreateCommand() {
-            return new CreateBookCommand(title, author, year, price);
+            return new CreateBookCommand(title, authors, year, price);
         }
 
         UpdateBookCommand toUpdateBookCommand(Long id) {
-            return new UpdateBookCommand(id, title, author, year, price);
+            return new UpdateBookCommand(id, title, authors, year, price);
         }
     }
 }
