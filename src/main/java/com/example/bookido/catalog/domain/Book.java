@@ -1,7 +1,6 @@
 package com.example.bookido.catalog.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -9,6 +8,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -28,12 +28,27 @@ public class Book {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
     @JsonIgnoreProperties("books")
-    private Set<Author> authors;
+    private Set<Author> authors = new HashSet<>();
 
     public Book(String title, Integer year, BigDecimal price) {
         this.title = title;
 
         this.year = year;
         this.price = price;
+    }
+
+    public void addAuthor(Author author) {
+        authors.add(author);
+        author.getBooks().add(this);
+    }
+
+    public void removeAuthor(Author author) {
+        authors.remove(author);
+        author.getBooks().remove(this);
+    }
+
+    public void removeAuthors() {
+        authors.forEach(author -> author.getBooks().remove(this));
+        authors.clear();
     }
 }
