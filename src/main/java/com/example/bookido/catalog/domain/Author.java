@@ -1,9 +1,8 @@
 package com.example.bookido.catalog.domain;
 
+import com.example.bookido.jpa.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -12,16 +11,13 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @ToString(exclude = "books")
-public class Author {
-    @Id
-    @GeneratedValue
-    private Long id;
-
+public class Author extends BaseEntity {
     private String firstName;
 
     private String lastName;
