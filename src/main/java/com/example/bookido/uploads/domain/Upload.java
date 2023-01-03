@@ -1,7 +1,10 @@
 package com.example.bookido.uploads.domain;
 
+import com.example.bookido.jpa.BaseEntity;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -11,19 +14,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
-public class Upload {
-    @Id
-    @GeneratedValue
-   private Long id;
-   private byte[] file;
-   private String contentType;
+public class Upload extends BaseEntity {
+
+    private byte[] file;
+    private String contentType;
     private String filename;
     @CreatedDate
-   private LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     public Upload(String filename, String contentType, byte[] file) {
         this.filename = filename;
