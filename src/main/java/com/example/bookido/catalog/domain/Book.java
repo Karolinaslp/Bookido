@@ -1,25 +1,21 @@
 package com.example.bookido.catalog.domain;
 
+import com.example.bookido.jpa.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
 @ToString(exclude = "authors")
 @RequiredArgsConstructor
 @Entity
-public class Book {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Book extends BaseEntity {
     private String title;
     private Integer year;
     private BigDecimal price;
