@@ -9,6 +9,7 @@ import com.example.bookido.uploads.application.ports.UploadUseCase;
 import com.example.bookido.uploads.domain.Upload;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +59,7 @@ class CatalogService implements CatalogUseCase {
 
 
     @Override
+    @Transactionalgit add
     public Book addBook(CreateBookCommand command) {
         Book book = toBook(command);
         return repository.save(book);
