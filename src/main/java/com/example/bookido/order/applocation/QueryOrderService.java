@@ -8,6 +8,7 @@ import com.example.bookido.order.domain.Order;
 import com.example.bookido.order.domain.OrderItem;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class QueryOrderService implements QueryOrderUseCase {
     private final BookJpaRepository catalogRepository;
 
     @Override
+    @Transactional
     public List<RichOrder> findAll() {
         return repository
                 .findAll()
