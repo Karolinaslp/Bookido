@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookJpaRepository extends JpaRepository<Book, Long> {
+    @Query("SELECT b FROM Book b JOIN FETCH b.authors")
+    List<Book> findAllEager();
 
     List<Book> findByAuthors_firstNameContainsIgnoreCaseOrAuthors_lastNameContainsIgnoreCase(String firstName, String lastName);
 
     List<Book> findAll();
+
     Optional<Book> findById(Long id);
 
     List<Book> findByTitleContainsIgnoreCase(String title);
