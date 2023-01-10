@@ -4,10 +4,7 @@ import com.example.bookido.commons.Either;
 import com.example.bookido.order.domain.OrderItem;
 import com.example.bookido.order.domain.OrderStatus;
 import com.example.bookido.order.domain.Recipient;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import lombok.*;
 
 import java.util.List;
 
@@ -23,8 +20,14 @@ public interface ManipulateOrderUseCase {
     @AllArgsConstructor
     class PlaceOrderCommand {
         @Singular
-        List<OrderItem> items;
+        List<OrderItemCommand> items;
         Recipient recipient;
+    }
+
+    @Value
+    class OrderItemCommand {
+        Long bookId;
+        int quantity;
     }
 
     @Value
