@@ -4,9 +4,11 @@ import com.example.bookido.catalog.db.BookJpaRepository;
 import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
 import com.example.bookido.order.db.OrderJpaRepository;
+import com.example.bookido.order.db.RecipientJpaRepository;
 import com.example.bookido.order.domain.Order;
 import com.example.bookido.order.domain.OrderItem;
 import com.example.bookido.order.domain.OrderStatus;
+import com.example.bookido.order.domain.Recipient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class ManipulateOrderService implements ManipulateOrderUseCase {
+    private final RecipientJpaRepository recipientJpaRepository;
     private final OrderJpaRepository repository;
     private final BookJpaRepository bookJpaRepository;
 
@@ -31,12 +34,19 @@ public class ManipulateOrderService implements ManipulateOrderUseCase {
 
         Order order = Order
                 .builder()
-                .recipient(command.getRecipient())
+                .recipient(getOrCreateRecipient(command.getRecipient()))
                 .items(items)
                 .build();
         Order save = repository.save(order);
         bookJpaRepository.saveAll(updateBooks(items));
         return PlaceOrderResponse.success(save.getId());
+    }
+
+    private Recipient getOrCreateRecipient(Recipient recipient) {
+        return recipientJpaRepository
+                .findByEmailIgnoreCase(recipient.getEmail())
+                .orElse(recipient);
+
     }
 
     private Set<Book> updateBooks(Set<OrderItem> items) {
