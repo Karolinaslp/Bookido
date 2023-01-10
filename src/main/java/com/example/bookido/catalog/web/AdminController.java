@@ -1,10 +1,12 @@
 package com.example.bookido.catalog.web;
 
 import com.example.bookido.catalog.application.port.CatalogUseCase;
+import com.example.bookido.catalog.application.port.CatalogUseCase.CreateBookCommand;
 import com.example.bookido.catalog.db.AuthorJpaRepository;
 import com.example.bookido.catalog.domain.Author;
 import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
+import com.example.bookido.order.applocation.port.ManipulateOrderUseCase.OrderItemCommand;
 import com.example.bookido.order.applocation.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.OrderItem;
 import com.example.bookido.order.domain.Recipient;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.Set;
+
+import static com.example.bookido.order.applocation.port.ManipulateOrderUseCase.*;
 
 @RestController
 @RequestMapping("/admin")
@@ -51,17 +55,14 @@ public class AdminController {
                 .email("jan@example.org")
                 .build();
 
-        if (true) {
-            throw new IllegalStateException("POISON!");
-        }
-            ManipulateOrderUseCase.PlaceOrderCommand command = ManipulateOrderUseCase.PlaceOrderCommand
+            PlaceOrderCommand command = PlaceOrderCommand
                     .builder()
                     .recipient(recipient)
-                    .item(new OrderItem(effectiveJava.getId(), 16))
-                    .item(new OrderItem(puzzlers.getId(), 7))
+                    .item(new OrderItemCommand(effectiveJava.getId(), 16))
+                    .item(new OrderItemCommand(puzzlers.getId(), 7))
                     .build();
 
-        ManipulateOrderUseCase.PlaceOrderResponse response = placeOrder.placeOrder(command);
+        PlaceOrderResponse response = placeOrder.placeOrder(command);
         String result = response.handle(
                 orderId -> "Creates ORDER with id: " + orderId,
                 error -> "Failed to create order: " + error
@@ -77,41 +78,47 @@ public class AdminController {
         authorJpaRepository.save(joshua);
         authorJpaRepository.save(neal);
 
-        CatalogUseCase.CreateBookCommand effectiveJava = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand effectiveJava = new CreateBookCommand(
                 "Effective Java",
                 Set.of(joshua.getId()),
                 2005,
-                new BigDecimal("89.00")
+                new BigDecimal("89.00"),
+                50L
         );
-        CatalogUseCase.CreateBookCommand wzorceProjektowe = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand wzorceProjektowe = new CreateBookCommand(
                 "Wzorce Projektowe", Set.of(),
                 2021,
-                new BigDecimal("109.00")
+                new BigDecimal("109.00"),
+                50L
         );
 
-        CatalogUseCase.CreateBookCommand java = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand java = new CreateBookCommand(
                 "Java",
                 Set.of(),
                 2016,
-                new BigDecimal("22.90")
+                new BigDecimal("22.90"),
+                50L
         );
-        CatalogUseCase.CreateBookCommand javaPrzewodnikDlaPoczatkujacych = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand javaPrzewodnikDlaPoczatkujacych = new CreateBookCommand(
                 "Java Przewodnik dla początkujących",
                 Set.of(),
                 2020,
-                new BigDecimal("89.00")
+                new BigDecimal("89.00"),
+                50L
         );
-        CatalogUseCase.CreateBookCommand algorytmy = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand algorytmy = new CreateBookCommand(
                 "algorytrmy",
                 Set.of(),
                 2016,
-                new BigDecimal("67.00")
+                new BigDecimal("67.00"),
+                50L
         );
-        CatalogUseCase.CreateBookCommand javaPuzzlers = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand javaPuzzlers = new CreateBookCommand(
                 "Java Puzzlers",
                 Set.of(joshua.getId(), neal.getId()),
                 2018,
-                new BigDecimal("99.00")
+                new BigDecimal("99.00"),
+                50L
         );
 
         catalog.addBook(effectiveJava);
