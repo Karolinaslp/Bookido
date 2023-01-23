@@ -21,9 +21,17 @@
         <commons.lang.version>3.12.0</commons.lang.version>
         <postgresql.version>42.2.19.jre7</postgresql.version>
         <springdoc.version>1.6.9</springdoc.version>
+        <opencsv.version>5.3</opencsv.version>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -116,5 +124,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
