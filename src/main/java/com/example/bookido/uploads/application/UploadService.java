@@ -4,11 +4,12 @@ import com.example.bookido.uploads.application.ports.UploadUseCase;
 import com.example.bookido.uploads.db.UploadJpaRepository;
 import com.example.bookido.uploads.domain.Upload;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UploadService implements UploadUseCase {
@@ -22,7 +23,7 @@ public class UploadService implements UploadUseCase {
                 command.getFile()
         );
         repository.save(upload);
-        System.out.println("Upload save: " + upload.getFilename() + " with id: " + upload.getId());
+        log.info("Upload save: " + upload.getFilename() + " with id: " + upload.getId());
         return upload;
     }
 
