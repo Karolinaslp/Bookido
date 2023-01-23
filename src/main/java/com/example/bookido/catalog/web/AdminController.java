@@ -5,12 +5,12 @@ import com.example.bookido.catalog.application.port.CatalogUseCase.CreateBookCom
 import com.example.bookido.catalog.db.AuthorJpaRepository;
 import com.example.bookido.catalog.domain.Author;
 import com.example.bookido.catalog.domain.Book;
-import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
-import com.example.bookido.order.applocation.port.ManipulateOrderUseCase.OrderItemCommand;
-import com.example.bookido.order.applocation.port.QueryOrderUseCase;
-import com.example.bookido.order.domain.OrderItem;
+import com.example.bookido.order.application.port.ManipulateOrderUseCase;
+import com.example.bookido.order.application.port.ManipulateOrderUseCase.OrderItemCommand;
+import com.example.bookido.order.application.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.Recipient;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static com.example.bookido.order.applocation.port.ManipulateOrderUseCase.*;
+import static com.example.bookido.order.application.port.ManipulateOrderUseCase.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin")
 @AllArgsConstructor
@@ -67,9 +68,10 @@ public class AdminController {
                 orderId -> "Creates ORDER with id: " + orderId,
                 error -> "Failed to create order: " + error
         );
+        log.info(result);
         // list all orders
         queryOrder.findAll()
-                .forEach(order -> System.out.println("GOT ORDER WITH TOTAL PRICE: " + order.totalPrice() + " DETAILS: " + order));
+                .forEach(order -> log.info("GOT ORDER WITH TOTAL PRICE: " + order.totalPrice() + " DETAILS: " + order));
     }
 
     private void initData() {
