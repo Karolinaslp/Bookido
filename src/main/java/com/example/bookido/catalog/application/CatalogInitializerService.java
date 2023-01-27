@@ -3,7 +3,9 @@ package com.example.bookido.catalog.application;
 import com.example.bookido.catalog.application.port.CatalogInitializerUseCase;
 import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.db.AuthorJpaRepository;
+import com.example.bookido.catalog.domain.Author;
 import com.example.bookido.catalog.domain.Book;
+import com.example.bookido.jpa.BaseEntity;
 import com.example.bookido.order.application.port.ManipulateOrderUseCase;
 import com.example.bookido.order.application.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.Recipient;
@@ -14,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +25,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 
 @Slf4j
 @Service
@@ -41,14 +48,14 @@ class CatalogInitializerService implements CatalogInitializerUseCase {
     }
 
     private void initData() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource("books.csv").getInputStream()))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource("books.csv").getInputStream()))) {
             CsvToBean<CsvBook> build = new CsvToBeanBuilder<CsvBook>(reader)
                     .withType(CsvBook.class)
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
 
             build.stream()
-                    .forEach(this:: initBook);
+                    .forEach(this::initBook);
 
         } catch (IOException e) {
             throw new IllegalStateException("Failed to parse CSV file", e);
@@ -56,16 +63,28 @@ class CatalogInitializerService implements CatalogInitializerUseCase {
     }
 
     private void initBook(CsvBook csvBook) {
-        // parse authors
-        CatalogUseCase.CreateBookCommand command = new CatalogUseCase.CreateBookCommand(
+        Set<Long> authors = Arrays.stream(csvBook.authors.split(","))
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .map(this::getOrCreateAuthor)
+                .map(BaseEntity::getId)
+                .collect(Collectors.toSet());
+
+        CreateBookCommand command = new CreateBookCommand(
                 csvBook.title,
-                Set.of(),
+                authors,
                 csvBook.year,
                 csvBook.amount,
                 50L
         );
         catalog.addBook(command);
         // upload thumbnail
+    }
+
+    private Author getOrCreateAuthor(String name) {
+        return authorJpaRepository
+                .findByNameIgnoreCase(name)
+                .orElseGet(() -> authorJpaRepository.save(new Author(name)));
     }
 
     @Data
