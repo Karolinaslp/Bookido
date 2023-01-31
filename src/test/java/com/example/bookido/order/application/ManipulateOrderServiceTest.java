@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import java.math.BigDecimal;
 
 import static com.example.bookido.order.application.port.ManipulateOrderUseCase.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -38,6 +39,20 @@ class ManipulateOrderServiceTest {
         assertTrue(response.isSuccess());
     }
 
+    @Test
+    public void userCantOrderMoreBooksThanAvailable() {
+        //Given
+        Book effectiveJava = givenEffectiveJava(5L);
+        PlaceOrderCommand command = PlaceOrderCommand
+                .builder()
+                .recipient(recipient())
+                .item(new OrderItemCommand(effectiveJava.getId(), 10))
+                .build();
+        //When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.placeOrder(command));
+        //Then
+        assertTrue(exception.getMessage().contains("Too many copies of book " + effectiveJava.getId() + " requested"));
+    }
     private Recipient recipient() {
         return Recipient.builder().email("john@example.org").build();
     }
