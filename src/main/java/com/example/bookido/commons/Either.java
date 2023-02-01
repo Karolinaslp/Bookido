@@ -1,9 +1,11 @@
 package com.example.bookido.commons;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.function.Function;
 
+@Getter
 @AllArgsConstructor
 public class Either<L, R> {
     private final boolean success;
