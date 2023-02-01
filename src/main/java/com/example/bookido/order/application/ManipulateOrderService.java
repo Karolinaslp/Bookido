@@ -1,8 +1,8 @@
-package com.example.bookido.order.applocation;
+package com.example.bookido.order.application;
 
 import com.example.bookido.catalog.db.BookJpaRepository;
 import com.example.bookido.catalog.domain.Book;
-import com.example.bookido.order.applocation.port.ManipulateOrderUseCase;
+import com.example.bookido.order.application.port.ManipulateOrderUseCase;
 import com.example.bookido.order.db.OrderJpaRepository;
 import com.example.bookido.order.db.RecipientJpaRepository;
 import com.example.bookido.order.domain.*;
@@ -34,9 +34,9 @@ public class ManipulateOrderService implements ManipulateOrderUseCase {
                 .recipient(getOrCreateRecipient(command.getRecipient()))
                 .items(items)
                 .build();
-        Order save = repository.save(order);
-        bookJpaRepository.saveAll(revokeBooks(items));
-        return PlaceOrderResponse.success(save.getId());
+        Order savedOrder = repository.save(order);
+        bookJpaRepository.saveAll(reduceBooks(items));
+        return PlaceOrderResponse.success(savedOrder.getId());
     }
 
     private Recipient getOrCreateRecipient(Recipient recipient) {
