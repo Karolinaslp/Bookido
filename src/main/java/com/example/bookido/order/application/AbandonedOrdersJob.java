@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.bookido.order.application.port.ManipulateOrderUseCase.*;
+
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -32,6 +34,11 @@ public class AbandonedOrdersJob {
         List<Order> orders = repository.findByStatusAndCreatedAtLessThanEqual(OrderStatus.NEW, olderThan);
         log.info("Found orders to be abandoned: " + orders.size());
         // update status as abandoned
-        orders.forEach(order -> orderUseCase.updateOrderStatus(order.getId(), OrderStatus.ABANDONED));
+        orders.forEach(order -> {
+            // TODO-Karolina: fix in security module
+            String adminEmail = "admin@example.org";
+            UpdateStatusCommand command = new UpdateStatusCommand(order.getId(), OrderStatus.ABANDONED, null);
+            orderUseCase.updateOrderStatus(command);
+        });
     }
 }

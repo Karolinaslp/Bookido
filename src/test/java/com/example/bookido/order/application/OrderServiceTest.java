@@ -6,6 +6,7 @@ import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.order.application.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.OrderStatus;
 import com.example.bookido.order.domain.Recipient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -72,28 +73,76 @@ class OrderServiceTest {
     public void userCanRevokeOrder() {
         //Given
         Book effectiveJava = givenEffectiveJava(50L);
-        Long orderId = placeOrder(effectiveJava.getId(), 15);
+        String recipient = "marek@example.com";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, recipient);
         assertEquals(35, availableCopiesOf(effectiveJava));
 
         //When
-        service.updateOrderStatus(orderId, OrderStatus.CANCELED);
+        //TODO-Karolina: fix on security module
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, recipient);
+        service.updateOrderStatus(command);
 
         //Then
         assertEquals(50L, availableCopiesOf(effectiveJava));
         assertEquals(OrderStatus.CANCELED, queryOrderService.findById(orderId).get().getStatus());
     }
 
-    private Long placeOrder(Long bookId, int copies) {
+    @Test
+    public void userCannotRevokeOtherUsersOrder() {
+        //Given
+        Book effectiveJava = givenEffectiveJava(50L);
+        String adam = "adam@example.org";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, adam);
+        assertEquals(35, availableCopiesOf(effectiveJava));
+
+        //When
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, "marek@example.org");
+        service.updateOrderStatus(command);
+
+        //Then
+        assertEquals(35L, availableCopiesOf(effectiveJava));
+        assertEquals(OrderStatus.NEW, queryOrderService.findById(orderId).get().getStatus());
+    }
+
+    @Disabled("homework")
+    public void userCannotREvokePaidOrder() {
+        // user nie moe wycofac juz oplaconego zamowienia
+    }
+
+    @Disabled("homework")
+    public void userCannotRevokeShippedOrder() {
+        // user nie moze wycofac juz wyslanego zamowienia
+    }
+
+    @Disabled("homework")
+    public void userCannotOrderNoExistingBooks() {
+        // user nie moze zamowic nieistniejacych ksiazek
+    }
+
+    @Disabled("homework")
+    public void userCannotOrderNegativeNumberOfBooks() {
+        // user nie moze zamowic ujemnej liczby ksiazek
+    }
+
+    private Long placeOrder(Long bookId, int copies, String recipient) {
         PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
-                .recipient(recipient())
+                .recipient(recipient(recipient))
                 .item(new OrderItemCommand(bookId, copies))
                 .build();
         return service.placeOrder(command).getRight();
     }
 
+    private Long placeOrder(Long bookId, int copies) {
+        return placeOrder(bookId, copies, "john@example.org");
+    }
+
     private Recipient recipient() {
-        return Recipient.builder().email("john@example.org").build();
+        return recipient("john@example.org");
+    }
+
+    private Recipient recipient(String email) {
+        return Recipient.builder().email(email).build();
     }
 
     private Book givenJavaConcurrency(long available) {
