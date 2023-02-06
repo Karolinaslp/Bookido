@@ -4,9 +4,9 @@ import com.example.bookido.catalog.application.port.CatalogUseCase;
 import com.example.bookido.catalog.db.BookJpaRepository;
 import com.example.bookido.catalog.domain.Book;
 import com.example.bookido.order.application.port.QueryOrderUseCase;
+import com.example.bookido.order.domain.Delivery;
 import com.example.bookido.order.domain.OrderStatus;
 import com.example.bookido.order.domain.Recipient;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -104,24 +104,166 @@ class OrderServiceTest {
         assertEquals(OrderStatus.NEW, queryOrderService.findById(orderId).get().getStatus());
     }
 
-    @Disabled("homework")
-    public void userCannotREvokePaidOrder() {
-        // user nie moe wycofac juz oplaconego zamowienia
+    @Test
+    public void userCannotRevokePaidOrder() {
+        // Given
+        Book effectiveJava = givenEffectiveJava(50L);
+        String adam = "adam@example.org";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, adam);
+
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, adam);
+        service.updateOrderStatus(command);
+
+        // When
+        UpdateStatusCommand cancelCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adam);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateOrderStatus(cancelCommand));
+
+        // Then
+        assertEquals(35, availableCopiesOf(effectiveJava));
+        assertTrue(exception.getMessage().contains("Unable to mark"));
     }
 
-    @Disabled("homework")
+    @Test
     public void userCannotRevokeShippedOrder() {
-        // user nie moze wycofac juz wyslanego zamowienia
+        // Given
+        Book effectiveJava = givenEffectiveJava(50L);
+        String adam = "adam@example.org";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, adam);
+
+        UpdateStatusCommand paidCommand = new UpdateStatusCommand(orderId, OrderStatus.PAID, adam);
+        service.updateOrderStatus(paidCommand);
+
+        UpdateStatusCommand shippedCommand = new UpdateStatusCommand(orderId, OrderStatus.SHIPPED, adam);
+        service.updateOrderStatus(shippedCommand);
+
+        // When
+        UpdateStatusCommand canceledCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adam);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateOrderStatus(canceledCommand));
+
+        //Then
+        assertEquals(35L, availableCopiesOf(effectiveJava));
+        assertTrue(exception.getMessage().contains("Unable to mark"));
     }
 
-    @Disabled("homework")
+    @Test
     public void userCannotOrderNoExistingBooks() {
-        // user nie moze zamowic nieistniejacych ksiazek
+        // Given
+        PlaceOrderCommand command = PlaceOrderCommand
+                .builder()
+                .recipient(recipient())
+                .item(new OrderItemCommand(-3L, 10))
+                .build();
+
+        // When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.placeOrder(command));
+
+        //Then
+        assertEquals("The book with id: " + command.getItems().get(0).getBookId() + " does not exist in our repository.", exception.getMessage());
     }
 
-    @Disabled("homework")
+    @Test
     public void userCannotOrderNegativeNumberOfBooks() {
-        // user nie moze zamowic ujemnej liczby ksiazek
+        // Given
+        Book effectiveJava = givenEffectiveJava(5L);
+        PlaceOrderCommand command = PlaceOrderCommand
+                .builder()
+                .recipient(recipient())
+                .item(new OrderItemCommand(effectiveJava.getId(), -5))
+                .build();
+
+        // When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.placeOrder(command));
+
+        // Then
+        assertEquals("Quantity cannot be negative.", exception.getMessage());
+    }
+
+    @Test
+    public void adminCanRevokeOtherUsersOrder() {
+        //Given
+        Book effectiveJava = givenEffectiveJava(50L);
+        String marek = "marek@example.org";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, marek);
+        assertEquals(35, availableCopiesOf(effectiveJava));
+
+        //When
+        String admin = "admin@example.org";
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, admin);
+        service.updateOrderStatus(command);
+
+        //Then
+        assertEquals(50L, availableCopiesOf(effectiveJava));
+        assertEquals(OrderStatus.CANCELED, queryOrderService.findById(orderId).get().getStatus());
+    }
+
+    @Test
+    public void adminCanMarkOrderAsPaid() {
+        //Given
+        Book effectiveJava = givenEffectiveJava(50L);
+        String recipient = "marek@example.com";
+        Long orderId = placeOrder(effectiveJava.getId(), 15, recipient);
+        assertEquals(35, availableCopiesOf(effectiveJava));
+
+        //When
+        String admin = "admin@example.org";
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, admin);
+        service.updateOrderStatus(command);
+
+        //Then
+        assertEquals(35L, availableCopiesOf(effectiveJava));
+        assertEquals(OrderStatus.PAID, queryOrderService.findById(orderId).get().getStatus());
+    }
+
+    @Test
+    public void shippingCostsAreAddedToTotalOrderPrice() {
+        // Given
+        Book book = givenBook(50L, "49.90");
+
+        // When
+        Long orderId = placeOrder(book.getId(), 1);
+
+        // Then
+        assertEquals("59.80", orderOf(orderId).getFinalPrice().toPlainString());
+    }
+
+    @Test
+    public void shippingCostsAreDiscountedOver100zl() {
+        // Given
+        Book book = givenBook(50L, "49.90");
+
+        // When
+        Long orderId = placeOrder(book.getId(), 3);
+
+        //Then
+        RichOrder order = orderOf(orderId);
+        assertEquals("149.70", order.getFinalPrice().toPlainString());
+        assertEquals("149.70", order.getOrderPrice().getItemPrice().toPlainString());
+    }
+
+    @Test
+    public void cheapestBookIsHalfPriceWhenTotalOver200zl() {
+        // Given
+        Book book = givenBook(50L, "49.90");
+
+        // When
+        Long orderId = placeOrder(book.getId(), 5);
+
+        // Then
+        RichOrder order = orderOf(orderId);
+        assertEquals("224.55", order.getFinalPrice().toPlainString());
+    }
+
+    @Test
+    public void cheapestBookIsFreeWhenTotalOver400zl() {
+        // Given
+        Book book = givenBook(50L, "49.90");
+
+        // When
+        Long orderId = placeOrder(book.getId(), 10);
+
+        // Then
+        RichOrder order = orderOf(orderId);
+        assertEquals("449.10", order.getFinalPrice().toPlainString());
     }
 
     private Long placeOrder(Long bookId, int copies, String recipient) {
@@ -129,8 +271,17 @@ class OrderServiceTest {
                 .builder()
                 .recipient(recipient(recipient))
                 .item(new OrderItemCommand(bookId, copies))
+                .delivery(Delivery.COURIER)
                 .build();
         return service.placeOrder(command).getRight();
+    }
+
+    private RichOrder orderOf(Long orderId) {
+        return queryOrderService.findById(orderId).get();
+    }
+
+    private Book givenBook(Long available, String price) {
+        return bookRepository.save(new Book("Java Concurrency in Practice", 2006, new BigDecimal(price), available));
     }
 
     private Long placeOrder(Long bookId, int copies) {
