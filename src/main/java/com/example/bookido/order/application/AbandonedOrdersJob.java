@@ -1,5 +1,6 @@
 package com.example.bookido.order.application;
 
+import com.example.bookido.clock.Clock;
 import com.example.bookido.order.application.port.ManipulateOrderUseCase;
 import com.example.bookido.order.db.OrderJpaRepository;
 import com.example.bookido.order.domain.Order;
@@ -14,7 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.bookido.order.application.port.ManipulateOrderUseCase.*;
+import static com.example.bookido.order.application.port.ManipulateOrderUseCase.UpdateStatusCommand;
 
 @Slf4j
 @Component
@@ -22,22 +23,22 @@ import static com.example.bookido.order.application.port.ManipulateOrderUseCase.
 public class AbandonedOrdersJob {
     private final OrderJpaRepository repository;
     private final ManipulateOrderUseCase orderUseCase;
-
     private final OrdersProperties properties;
+    private final Clock clock;
 
     @Transactional
     @Scheduled(cron = "${app.orders.abandon-cron}")
     public void run() {
         Duration paymentPeriod = properties.getPaymentPeriod();
         // find abandoned orders
-        LocalDateTime olderThan = LocalDateTime.now().minus(paymentPeriod);
+        LocalDateTime olderThan = clock.now().minus(paymentPeriod);
         List<Order> orders = repository.findByStatusAndCreatedAtLessThanEqual(OrderStatus.NEW, olderThan);
         log.info("Found orders to be abandoned: " + orders.size());
         // update status as abandoned
         orders.forEach(order -> {
             // TODO-Karolina: fix in security module
             String adminEmail = "admin@example.org";
-            UpdateStatusCommand command = new UpdateStatusCommand(order.getId(), OrderStatus.ABANDONED, null);
+            UpdateStatusCommand command = new UpdateStatusCommand(order.getId(), OrderStatus.ABANDONED, adminEmail);
             orderUseCase.updateOrderStatus(command);
         });
     }
