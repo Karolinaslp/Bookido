@@ -29,11 +29,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
+import static com.example.bookido.catalog.application.port.CatalogUseCase.CreateBookCommand;
+import static com.example.bookido.catalog.application.port.CatalogUseCase.UpdateBookCoverCommand;
 
 @Slf4j
 @Service
@@ -147,6 +147,6 @@ class CatalogInitializerService implements CatalogInitializerUseCase {
         log.info(result);
         // list all orders
         queryOrder.findAll()
-                .forEach(order -> log.info("GOT ORDER WITH TOTAL PRICE: " + order.totalPrice() + " DETAILS: " + order));
+                .forEach(order -> log.info("GOT ORDER WITH TOTAL PRICE: " + order.getFinalPrice() + " DETAILS: " + order));
     }
 }

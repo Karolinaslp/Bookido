@@ -1,11 +1,10 @@
-package com.example.bookido.order.applocation;
+package com.example.bookido.order.application;
 
-import com.example.bookido.catalog.db.BookJpaRepository;
-import com.example.bookido.catalog.domain.Book;
-import com.example.bookido.order.applocation.port.QueryOrderUseCase;
+import com.example.bookido.order.application.port.QueryOrderUseCase;
+import com.example.bookido.order.application.price.OrderPrice;
+import com.example.bookido.order.application.price.PriceService;
 import com.example.bookido.order.db.OrderJpaRepository;
 import com.example.bookido.order.domain.Order;
-import com.example.bookido.order.domain.OrderItem;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class QueryOrderService implements QueryOrderUseCase {
     private final OrderJpaRepository repository;
-    private final BookJpaRepository catalogRepository;
+    private final PriceService priceService;
 
     @Override
     @Transactional
@@ -31,17 +30,21 @@ public class QueryOrderService implements QueryOrderUseCase {
     }
 
     @Override
+    @Transactional
     public Optional<RichOrder> findById(Long id) {
         return repository.findById(id).map(this::toRichOrder);
     }
 
     private RichOrder toRichOrder(Order order) {
+        OrderPrice orderPrice = priceService.calculatePrice(order);
         return new RichOrder(
                 order.getId(),
                 order.getStatus(),
                 order.getItems(),
                 order.getRecipient(),
-                order.getCreatedAt()
+                order.getCreatedAt(),
+                orderPrice,
+                orderPrice.finalPrice()
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.bookido.order.application.port;
 
 import com.example.bookido.commons.Either;
+import com.example.bookido.order.domain.Delivery;
 import com.example.bookido.order.domain.OrderStatus;
 import com.example.bookido.order.domain.Recipient;
 import lombok.*;
@@ -21,6 +22,7 @@ public interface ManipulateOrderUseCase {
         @Singular
         List<OrderItemCommand> items;
         Recipient recipient;
+        Delivery delivery;
     }
 
     @Value
