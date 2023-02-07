@@ -33,8 +33,7 @@ class CatalogController {
     @ResponseStatus(HttpStatus.OK)
     public List<Book> getAll(
             @RequestParam Optional<String> title,
-            @RequestParam Optional<String> author
-    ) {
+            @RequestParam Optional<String> author) {
         if (title.isPresent() && author.isPresent()) {
             return catalog.findByTitleAndAuthor(title.get(), author.get());
         } else if (title.isPresent()) {
@@ -98,7 +97,7 @@ class CatalogController {
         return new CreatedURI("/" + book.getId().toString()).uri();
     }
 
-   @Data
+    @Data
     private static class RestBookCommand {
         @NotBlank(message = "Please provide a title")
         private String title;

@@ -1,3 +1,9 @@
+### Initialize Data
+POST http://localhost:8080/admin/data
+
+### Catalog
+GET http://localhost:8080/catalog
+
 ###
 POST http://localhost:8080/orders
 Content-Type: application/json
