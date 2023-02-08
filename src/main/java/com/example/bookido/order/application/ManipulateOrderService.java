@@ -24,16 +24,15 @@ public class ManipulateOrderService implements ManipulateOrderUseCase {
 
     @Override
     public PlaceOrderResponse placeOrder(PlaceOrderCommand command) {
-        Set<OrderItem> items = command
-                .getItems()
-                .stream()
-                .map(this::toOrderItem)
-                .collect(Collectors.toSet());
+        Set<OrderItem> items = command.getItems()
+                                      .stream()
+                                      .map(this::toOrderItem)
+                                      .collect(Collectors.toSet());
 
         Order order = Order
                 .builder()
                 .recipient(getOrCreateRecipient(command.getRecipient()))
-                .delivery(command.getDelivery())
+                .delivery(command.getDelivery() == null ? Delivery.COURIER : command.getDelivery())
                 .items(items)
                 .build();
         Order savedOrder = repository.save(order);

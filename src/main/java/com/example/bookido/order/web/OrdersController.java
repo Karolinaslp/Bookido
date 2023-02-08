@@ -7,10 +7,14 @@ import com.example.bookido.order.application.port.ManipulateOrderUseCase.PlaceOr
 import com.example.bookido.order.application.port.ManipulateOrderUseCase.UpdateStatusCommand;
 import com.example.bookido.order.application.port.QueryOrderUseCase;
 import com.example.bookido.order.domain.OrderStatus;
+import com.example.bookido.security.UserSecurity;
 import com.example.bookido.web.CreatedURI;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,8 +22,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.ACCEPTED;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @AllArgsConstructor
@@ -27,17 +30,28 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 class OrdersController {
     private final ManipulateOrderUseCase manipulateOrder;
     private final QueryOrderUseCase queryOrder;
+    private final UserSecurity userSecurity;
 
+    @Secured({"ROLE_ADMIN"})
     @GetMapping
     public List<RichOrder> getOrders() {
         return queryOrder.findAll();
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping("/{id}")
-    public ResponseEntity<RichOrder> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<RichOrder> getOrderById(@PathVariable Long id, @AuthenticationPrincipal User user) {
         return queryOrder.findById(id)
-                .map(ResponseEntity::ok)
+                .filter(order -> userSecurity.isOwnerOrAdmin(order.getRecipient().getEmail(), user))
+                .map(order -> authorize(order, user))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private ResponseEntity<RichOrder> authorize(RichOrder order, User user) {
+        if (userSecurity.isOwnerOrAdmin(order.getRecipient().getEmail(), user)) {
+            return ResponseEntity.ok(order);
+        }
+        return ResponseEntity.status(FORBIDDEN).build();
     }
 
     @PostMapping
@@ -55,7 +69,8 @@ class OrdersController {
         return new CreatedURI("/" + orderId).uri();
     }
 
-    @PutMapping("/{id}/status")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
+    @PatchMapping("/{id}/status")
     @ResponseStatus(ACCEPTED)
     public void updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String status = body.get("status");
@@ -67,6 +82,7 @@ class OrdersController {
         manipulateOrder.updateOrderStatus(command);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable Long id) {
