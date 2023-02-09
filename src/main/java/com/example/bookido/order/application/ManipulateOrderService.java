@@ -6,6 +6,7 @@ import com.example.bookido.order.application.port.ManipulateOrderUseCase;
 import com.example.bookido.order.db.OrderJpaRepository;
 import com.example.bookido.order.db.RecipientJpaRepository;
 import com.example.bookido.order.domain.*;
+import com.example.bookido.security.UserSecurity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +22,14 @@ public class ManipulateOrderService implements ManipulateOrderUseCase {
     private final RecipientJpaRepository recipientJpaRepository;
     private final OrderJpaRepository repository;
     private final BookJpaRepository bookJpaRepository;
+    private final UserSecurity userSecurity;
 
     @Override
     public PlaceOrderResponse placeOrder(PlaceOrderCommand command) {
         Set<OrderItem> items = command.getItems()
-                                      .stream()
-                                      .map(this::toOrderItem)
-                                      .collect(Collectors.toSet());
+                .stream()
+                .map(this::toOrderItem)
+                .collect(Collectors.toSet());
 
         Order order = Order
                 .builder()
@@ -82,27 +84,22 @@ public class ManipulateOrderService implements ManipulateOrderUseCase {
     }
 
     @Override
+    @Transactional
     public UpdateStatusResponse updateOrderStatus(UpdateStatusCommand command) {
-        return repository.findById(command.getOrderId())
+        return repository
+                .findById(command.getOrderId())
                 .map(order -> {
-                    if (!hasAccess(command, order)) {
-                        return UpdateStatusResponse.failure("Unauthorized");
+                    if (userSecurity.isOwnerOrAdmin(order.getRecipient().getEmail(), command.getUser())) {
+                        UpdateStatusResult result = order.updateStatus(command.getStatus());
+                        if (result.isRevoked()) {
+                            bookJpaRepository.saveAll(revokeBooks(order.getItems()));
+                        }
+                        repository.save(order);
+                        return UpdateStatusResponse.success(order.getStatus());
                     }
-                    UpdateStatusResult result = order.updateStatus(command.getStatus());
-                    if (result.isRevoked()) {
-                        bookJpaRepository.saveAll(revokeBooks(order.getItems()));
-                    }
-                    repository.save(order);
-                    return UpdateStatusResponse.success(order.getStatus());
+                    return UpdateStatusResponse.failure(Error.FORBIDDEN);
                 })
-                .orElse(UpdateStatusResponse.failure("Order not found"));
-    }
-
-    private static boolean hasAccess(UpdateStatusCommand command, Order order) {
-        String email = command.getEmail();
-        return command.getEmail().equalsIgnoreCase(order.getRecipient().getEmail()) ||
-                email.equalsIgnoreCase("admin@example.org");
-
+                .orElse(UpdateStatusResponse.failure(Error.NOT_FOUND));
     }
 
     private Set<Book> revokeBooks(Set<OrderItem> items) {

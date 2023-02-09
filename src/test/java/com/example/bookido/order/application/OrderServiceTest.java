@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static com.example.bookido.order.application.port.ManipulateOrderUseCase.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,8 +81,7 @@ class OrderServiceTest {
         assertEquals(35, availableCopiesOf(effectiveJava));
 
         //When
-        //TODO-Karolina: fix on security module
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, recipient);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user(recipient));
         service.updateOrderStatus(command);
 
         //Then
@@ -96,7 +98,7 @@ class OrderServiceTest {
         assertEquals(35, availableCopiesOf(effectiveJava));
 
         //When
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, "marek@example.org");
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user("marek@example.org"));
         service.updateOrderStatus(command);
 
         //Then
@@ -111,11 +113,11 @@ class OrderServiceTest {
         String adam = "adam@example.org";
         Long orderId = placeOrder(effectiveJava.getId(), 15, adam);
 
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, adam);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, user(adam));
         service.updateOrderStatus(command);
 
         // When
-        UpdateStatusCommand cancelCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adam);
+        UpdateStatusCommand cancelCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user(adam));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateOrderStatus(cancelCommand));
 
         // Then
@@ -130,14 +132,14 @@ class OrderServiceTest {
         String adam = "adam@example.org";
         Long orderId = placeOrder(effectiveJava.getId(), 15, adam);
 
-        UpdateStatusCommand paidCommand = new UpdateStatusCommand(orderId, OrderStatus.PAID, adam);
+        UpdateStatusCommand paidCommand = new UpdateStatusCommand(orderId, OrderStatus.PAID, user(adam));
         service.updateOrderStatus(paidCommand);
 
-        UpdateStatusCommand shippedCommand = new UpdateStatusCommand(orderId, OrderStatus.SHIPPED, adam);
+        UpdateStatusCommand shippedCommand = new UpdateStatusCommand(orderId, OrderStatus.SHIPPED, user(adam));
         service.updateOrderStatus(shippedCommand);
 
         // When
-        UpdateStatusCommand canceledCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adam);
+        UpdateStatusCommand canceledCommand = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user(adam));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateOrderStatus(canceledCommand));
 
         //Then
@@ -187,8 +189,7 @@ class OrderServiceTest {
         assertEquals(35, availableCopiesOf(effectiveJava));
 
         //When
-        String admin = "admin@example.org";
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, admin);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adminUser());
         service.updateOrderStatus(command);
 
         //Then
@@ -205,8 +206,7 @@ class OrderServiceTest {
         assertEquals(35, availableCopiesOf(effectiveJava));
 
         //When
-        String admin = "admin@example.org";
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, admin);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, adminUser());
         service.updateOrderStatus(command);
 
         //Then
@@ -288,20 +288,28 @@ class OrderServiceTest {
         return placeOrder(bookId, copies, "john@example.org");
     }
 
-    private Recipient recipient() {
-        return recipient("john@example.org");
-    }
-
-    private Recipient recipient(String email) {
-        return Recipient.builder().email(email).build();
-    }
-
     private Book givenJavaConcurrency(long available) {
         return bookRepository.save(new Book("Java Concurrency in Practice", 2006, new BigDecimal("99.90"), available));
     }
 
     private Book givenEffectiveJava(long available) {
         return bookRepository.save(new Book("Effective java", 2005, new BigDecimal("199.90"), available));
+    }
+
+    private User user(String email) {
+        return new User(email, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+    }
+
+    private User adminUser() {
+        return new User("admin", "", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+    }
+
+    private Recipient recipient() {
+        return recipient("john@example.org");
+    }
+
+    private Recipient recipient(String email) {
+        return Recipient.builder().email(email).build();
     }
 
     private Long availableCopiesOf(Book effectiveJava) {
