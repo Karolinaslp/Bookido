@@ -1,5 +1,6 @@
 package com.example.bookido.security;
 
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
 
@@ -23,17 +25,23 @@ public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // GET catalog, Get catalog/ID
+        http.csrf().disable();
         http
                 .authorizeRequests()
-                .mvcMatchers("/catalog/**", "/uploads/**", "/authors/**").permitAll()
-                .mvcMatchers(HttpMethod.POST, "/orders").permitAll()
+                .mvcMatchers(HttpMethod.GET,"/catalog/**", "/uploads/**", "/authors/**").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/orders", "/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
+                    .httpBasic()
                 .and()
-                .csrf().disable();
+                    .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
 
+    @SneakyThrows
+    private JsonUsernameAuthenticationFilter authenticationFilter() {
+        JsonUsernameAuthenticationFilter filter = new JsonUsernameAuthenticationFilter();
+        filter.setAuthenticationManager(super.authenticationManager());
+        return filter;
     }
 
     @Override
@@ -43,7 +51,7 @@ public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .password("{noop}xxx")
                 .roles("USER")
                 .and()
-                .withUser("ADMIN")
+                .withUser("admin")
                 .password("{noop}xxx")
                 .roles("ADMIN");
     }

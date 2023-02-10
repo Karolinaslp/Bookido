@@ -13,7 +13,7 @@ public enum OrderStatus {
                 case PAID -> UpdateStatusResult.ok(PAID);
                 case CANCELED -> UpdateStatusResult.revoked(CANCELED);
                 case ABANDONED -> UpdateStatusResult.revoked(ABANDONED);
-                default -> status.updateStatus(status);
+                default -> super.updateStatus(status);
             };
         }
     },
@@ -32,7 +32,7 @@ public enum OrderStatus {
 
     public static Optional<OrderStatus> parseString(String value) {
         return Arrays.stream(values())
-                .filter(it -> StringUtils.equalsAnyIgnoreCase(it.name()))
+                .filter(status -> StringUtils.equalsAnyIgnoreCase(status.name(), value))
                 .findFirst();
     }
 

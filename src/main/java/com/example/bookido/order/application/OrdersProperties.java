@@ -13,3 +13,4 @@ public class OrdersProperties {
     Duration paymentPeriod;
     String abandonCron;
 }
+
