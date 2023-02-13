@@ -1,11 +1,12 @@
 package com.example.bookido.security;
 
-import com.example.bookido.user.db.UserEntityRepository;
+import com.example.bookido.users.db.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableConfigurationProperties(AdminConfig.class)
+@Profile("!test")
 public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final UserEntityRepository userEntityRepository;
     private final AdminConfig config;
@@ -37,7 +39,7 @@ public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .mvcMatchers(HttpMethod.GET,"/catalog/**", "/uploads/**", "/authors/**").permitAll()
-                .mvcMatchers(HttpMethod.POST, "/orders", "/login").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/orders", "/login", "/users").permitAll()
                 .anyRequest().authenticated()
                 .and()
                     .httpBasic()

@@ -1,6 +1,6 @@
 package com.example.bookido.security;
 
-import com.example.bookido.user.db.UserEntityRepository;
+import com.example.bookido.users.db.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

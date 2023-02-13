@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,7 +22,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @RestController
 @AllArgsConstructor
@@ -40,14 +41,14 @@ class OrdersController {
 
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping("/{id}")
-    public ResponseEntity<RichOrder> getOrderById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<RichOrder> getOrderById(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
         return queryOrder.findById(id)
                 .filter(order -> userSecurity.isOwnerOrAdmin(order.getRecipient().getEmail(), user))
                 .map(order -> authorize(order, user))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private ResponseEntity<RichOrder> authorize(RichOrder order, User user) {
+    private ResponseEntity<RichOrder> authorize(RichOrder order, UserDetails user) {
         if (userSecurity.isOwnerOrAdmin(order.getRecipient().getEmail(), user)) {
             return ResponseEntity.ok(order);
         }
@@ -71,7 +72,7 @@ class OrdersController {
 
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Object> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Object> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body, @AuthenticationPrincipal UserDetails user) {
         String status = body.get("status");
         OrderStatus orderStatus = OrderStatus
                 .parseString(status)

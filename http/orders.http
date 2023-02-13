@@ -30,4 +30,15 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/orders/2
+GET http://localhost:8080/orders
+
+###
+DELETE http://localhost:8080/orders/131
+
+###
+PUT http://localhost:8080/orders/13/status
+Content-Type: application/json
+
+{
+  "status": "CANCELED"
+}
