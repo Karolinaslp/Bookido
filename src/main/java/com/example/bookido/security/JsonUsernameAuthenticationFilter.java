@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 class JsonUsernameAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @SneakyThrows

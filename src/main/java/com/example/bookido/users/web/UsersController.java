@@ -16,7 +16,8 @@ import javax.validation.constraints.Size;
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
-public class UsersController {
+class UsersController {
+
     private final UserRegistrationUseCase register;
 
     @PostMapping
@@ -37,4 +38,3 @@ public class UsersController {
         String password;
     }
 }
-

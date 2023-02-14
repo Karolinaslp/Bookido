@@ -1,6 +1,6 @@
 package com.example.bookido.security;
 
-import com.example.bookido.users.db.UserEntityRepository;
+import com.example.bookido.user.db.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,7 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableConfigurationProperties(AdminConfig.class)
 @Profile("!test")
-public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
+class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
     private final UserEntityRepository userEntityRepository;
     private final AdminConfig config;
 
@@ -38,13 +39,13 @@ public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http
                 .authorizeRequests()
-                .mvcMatchers(HttpMethod.GET,"/catalog/**", "/uploads/**", "/authors/**").permitAll()
+                .mvcMatchers(HttpMethod.GET, "/catalog/**", "/uploads/**", "/authors/**").permitAll()
                 .mvcMatchers(HttpMethod.POST, "/orders", "/login", "/users").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                    .httpBasic()
+                .httpBasic()
                 .and()
-                    .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @SneakyThrows
@@ -56,7 +57,7 @@ public class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
-       auth.authenticationProvider(authenticationProvider());
+        auth.authenticationProvider(authenticationProvider());
     }
 
     @Bean

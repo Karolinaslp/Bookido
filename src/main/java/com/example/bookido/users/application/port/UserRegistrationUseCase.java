@@ -1,10 +1,9 @@
 package com.example.bookido.users.application.port;
 
 import com.example.bookido.commons.Either;
-import com.example.bookido.users.domain.UserEntity;
+import com.example.bookido.user.domain.UserEntity;
 
 public interface UserRegistrationUseCase {
-
     RegisterResponse register(String username, String password);
 
     class RegisterResponse extends Either<String, UserEntity> {

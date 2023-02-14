@@ -1,4 +1,4 @@
-package com.example.bookido.users.domain;
+package com.example.bookido.user.domain;
 
 import com.example.bookido.jpa.BaseEntity;
 import lombok.Getter;
@@ -15,10 +15,10 @@ import java.util.Set;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class UserEntity extends BaseEntity {
 
     private String username;
