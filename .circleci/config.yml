@@ -1,13 +1,19 @@
+
 version: 2.1
-executors:
-  java17:
+jobs:
+  build-and-test:
     docker:
-      - image: 'cimg/openjdk:17.0'
-orbs:
-  maven: circleci/maven@1.3.0
+      - image: cimg/openjdk:17.0
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: mvn -B -DskipTests clean package
+      - run:
+          name: Test
+          command: mvn test
 workflows:
-  maven_test:
+  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - maven/test:
-          command: '-X compile'
-          executor: java17
+      - build-and-test
