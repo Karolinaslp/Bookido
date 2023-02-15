@@ -6,11 +6,37 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum OrderStatus {
-    NEW, CONFIRMED, IN_DELIVERY, DELIVERED, CANCELED, RETURNED;
+    NEW {
+        @Override
+        public UpdateStatusResult updateStatus(OrderStatus status) {
+            return switch (status) {
+                case PAID -> UpdateStatusResult.ok(PAID);
+                case CANCELED -> UpdateStatusResult.revoked(CANCELED);
+                case ABANDONED -> UpdateStatusResult.revoked(ABANDONED);
+                default -> super.updateStatus(status);
+            };
+        }
+    },
+    PAID{
+        @Override
+        public UpdateStatusResult updateStatus(OrderStatus status) {
+            if (status == SHIPPED) {
+                return UpdateStatusResult.ok(SHIPPED);
+            }
+            return super.updateStatus(status);
+        }
+    },
+    CANCELED,
+    ABANDONED,
+    SHIPPED;
 
     public static Optional<OrderStatus> parseString(String value) {
         return Arrays.stream(values())
-                .filter(it -> StringUtils.equalsAnyIgnoreCase(it.name()))
+                .filter(status -> StringUtils.equalsAnyIgnoreCase(status.name(), value))
                 .findFirst();
+    }
+
+    public UpdateStatusResult updateStatus(OrderStatus status) {
+        throw new IllegalArgumentException("Unable to mark " + this.name() + " order as " + status.name());
     }
 }

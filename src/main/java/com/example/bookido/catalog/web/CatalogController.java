@@ -8,25 +8,24 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 
 import javax.validation.Valid;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.example.bookido.catalog.application.port.CatalogUseCase.*;
 
-@RequestMapping("catalog")
 @RestController
+@RequestMapping("catalog")
 @AllArgsConstructor
 class CatalogController {
     private final CatalogUseCase catalog;
@@ -35,8 +34,7 @@ class CatalogController {
     @ResponseStatus(HttpStatus.OK)
     public List<Book> getAll(
             @RequestParam Optional<String> title,
-            @RequestParam Optional<String> author
-    ) {
+            @RequestParam Optional<String> author) {
         if (title.isPresent() && author.isPresent()) {
             return catalog.findByTitleAndAuthor(title.get(), author.get());
         } else if (title.isPresent()) {
@@ -47,6 +45,7 @@ class CatalogController {
         return catalog.findAll();
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         return catalog
@@ -55,7 +54,8 @@ class CatalogController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @Secured({"ROLE_ADMIN"})
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateBook(@PathVariable Long id, @RequestBody RestBookCommand command) {
         UpdateBookResponse response = catalog.updateBook(command.toUpdateBookCommand(id));
@@ -65,6 +65,7 @@ class CatalogController {
         }
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PutMapping(value = "/{id}/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void addBookCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
@@ -77,12 +78,14 @@ class CatalogController {
         ));
     }
 
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeBookCover(@PathVariable Long id) {
         catalog.removeBookCover(id);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Void> addBook(@Valid @RequestBody RestBookCommand command) {
@@ -90,6 +93,7 @@ class CatalogController {
         return ResponseEntity.created(createdBookUri(book)).build();
     }
 
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
@@ -105,8 +109,8 @@ class CatalogController {
         @NotBlank(message = "Please provide a title")
         private String title;
 
-        @NotBlank(message = "Please provide an author")
-        private String author;
+        @NotEmpty
+        private Set<Long> authors;
 
         @NotNull
         private Integer year;
@@ -115,12 +119,16 @@ class CatalogController {
         @DecimalMin("0.00")
         private BigDecimal price;
 
+        @NotNull
+        @PositiveOrZero
+        private Long available;
+
         CreateBookCommand toCreateCommand() {
-            return new CreateBookCommand(title, author, year, price);
+            return new CreateBookCommand(title, authors, year, price, available);
         }
 
         UpdateBookCommand toUpdateBookCommand(Long id) {
-            return new UpdateBookCommand(id, title, author, year, price);
+            return new UpdateBookCommand(id, title, authors, year, price);
         }
     }
 }

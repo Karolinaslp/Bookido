@@ -1,3 +1,9 @@
+### Initialize Data
+POST http://localhost:8080/admin/data
+
+### Catalog
+GET http://localhost:8080/catalog
+
 ###
 POST http://localhost:8080/orders
 Content-Type: application/json
@@ -5,12 +11,12 @@ Content-Type: application/json
 {
     "items": [
       {
-        "bookId": 0;
-        "quantity": 2
+        "bookId": 3,
+        "quantity": 1
       },
       {
-        "bookId": 1,
-        "quantity": 1
+        "bookId": 4,
+        "quantity": 2
       }
     ],
     "recipient": {
@@ -24,4 +30,15 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/orders/2
+GET http://localhost:8080/orders
+
+###
+DELETE http://localhost:8080/orders/131
+
+###
+PUT http://localhost:8080/orders/13/status
+Content-Type: application/json
+
+{
+  "status": "CANCELED"
+}

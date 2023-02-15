@@ -1,29 +1,53 @@
 package com.example.bookido.catalog.domain;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.example.bookido.jpa.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "authors")
 @RequiredArgsConstructor
-public class Book {
-  private Long id;
-  private String title;
-  private String author;
-  private Integer year;
-  private BigDecimal price;
-  private String coverId;
+@Entity
+public class Book extends BaseEntity {
+    @Column(unique = true)
+    private String title;
+    private Integer year;
+    private BigDecimal price;
+    private Long coverId;
+    private Long available;
 
-  public Book(String title, String author, Integer year, BigDecimal price) {
-    this.title = title;
-    this.author = author;
-    this.year = year;
-    this.price = price;
-  }
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable
+    @JsonIgnoreProperties("books")
+    private Set<Author> authors = new HashSet<>();
+
+    public Book(String title, Integer year, BigDecimal price, Long available) {
+        this.title = title;
+        this.year = year;
+        this.price = price;
+        this.available = available;
+    }
+
+    public void addAuthor(Author author) {
+        authors.add(author);
+        author.getBooks().add(this);
+    }
+
+    public void removeAuthor(Author author) {
+        authors.remove(author);
+        author.getBooks().remove(this);
+    }
+
+    public void removeAuthors() {
+        authors.forEach(author -> author.getBooks().remove(this));
+        authors.clear();
+    }
 }
