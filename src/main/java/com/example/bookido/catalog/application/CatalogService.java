@@ -57,7 +57,6 @@ class CatalogService implements CatalogUseCase {
         return repository.findByTitleAndAuthor(title, author);
     }
 
-
     @Override
     @Transactional
     public Book addBook(CreateBookCommand command) {
