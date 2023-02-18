@@ -22,9 +22,15 @@
         <postgresql.version>42.2.19.jre7</postgresql.version>
         <springdoc.version>1.6.9</springdoc.version>
         <opencsv.version>5.3</opencsv.version>
+        <flyway.version>9.15.0</flyway.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -125,11 +131,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
             </plugin>
         </plugins>
     </build>

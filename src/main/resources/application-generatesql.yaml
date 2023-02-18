@@ -1,0 +1,12 @@
+spring:
+  profiles: generatesql
+  flyway.enabled: false
+  jpa.properties.schema-generation.scripts:
+    action: create
+    create-target: create.sql
+    create-source: metadata
+spring.datasource.url: jdbc:postgresql://localhost:7432/bookido
+spring.datasource.username: postgres
+spring.datasource.password: qwerty
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.jpa.database-platform: org.hibernate.dialect.PostgresSQLDialect
