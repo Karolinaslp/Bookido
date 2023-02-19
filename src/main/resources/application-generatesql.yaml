@@ -1,12 +1,26 @@
 spring:
   profiles: generate
-  flyway.enabled: false
-  jpa.properties.schema-generation.scripts:
-    action: create
-    create-target: create.sql
-    create-source: metadata
-spring.datasource.url: jdbc:postgresql://${PROD_DB_HOST}:${PROD_DB_PORT}/${PROD_DB_NAME}
-spring.datasource.username: ${PROD_DB_USERNAME}
-spring.datasource.password: ${PROD_DB_PASSWORD}
-spring.datasource.driver-class-name: org.postgresql.Driver
-spring.jpa.database-platform: org.hibernate.dialect.PostgresSQLDialect
+  flyway:
+    url: ${PROD_DB_URL}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+    locations: src/main/resources/db/migration
+    baselineOnMigrate: true
+    validateOnMigrate: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgresSQLDialect
+    hibernate:
+      ddl-auto: none
+      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+  datasource:
+     url: ${PROD_DB_URL}
+     username: ${PROD_DB_USERNAME}
+     password: ${PROD_DB_PASSWORD}
+     driver-class-name: org.postgresql.Driver
+server:
+  port:${PORT:8080}
