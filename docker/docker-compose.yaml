@@ -1,6 +1,15 @@
 version: 'v2.13.0'
 
 services:
+  app:
+    container_name: bookido
+    image: bookido:0.0.1-SNAPSHOT
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bookido
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: pass123
+    ports:
+      - 9080:8080
   db:
     container_name: bookido
     image: postgres:15.1
