@@ -1,0 +1,9 @@
+spring:
+  profiles: generatesql
+  flyway.locations: src/main/resources/db.migration
+  flyway.validateMigrationNaming: true
+  flyway.enabled: false
+  jpa.properties.javax.persistence.schema-generation.scripts:
+    action: create
+    create-target: create.sql
+    create-source: metadata
