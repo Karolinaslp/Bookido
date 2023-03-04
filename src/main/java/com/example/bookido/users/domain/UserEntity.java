@@ -1,4 +1,4 @@
-package com.example.bookido.user.domain;
+package com.example.bookido.users.domain;
 
 import com.example.bookido.jpa.BaseEntity;
 import lombok.Getter;

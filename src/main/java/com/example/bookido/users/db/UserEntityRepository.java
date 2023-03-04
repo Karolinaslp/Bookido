@@ -1,6 +1,6 @@
-package com.example.bookido.user.db;
+package com.example.bookido.users.db;
 
-import com.example.bookido.user.domain.UserEntity;
+import com.example.bookido.users.domain.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.example.bookido.security;
 
-import com.example.bookido.user.db.UserEntityRepository;
+import com.example.bookido.users.db.UserEntityRepository;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,6 +41,7 @@ class BookidoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .mvcMatchers(HttpMethod.GET, "/catalog/**", "/uploads/**", "/authors/**").permitAll()
                 .mvcMatchers(HttpMethod.POST, "/orders", "/login", "/users").permitAll()
+                .mvcMatchers("/swagger-ui/**", "/v3/api-docs/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()

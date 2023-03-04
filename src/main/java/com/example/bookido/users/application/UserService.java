@@ -1,7 +1,7 @@
 package com.example.bookido.users.application;
 
-import com.example.bookido.user.db.UserEntityRepository;
-import com.example.bookido.user.domain.UserEntity;
+import com.example.bookido.users.db.UserEntityRepository;
+import com.example.bookido.users.domain.UserEntity;
 import com.example.bookido.users.application.port.UserRegistrationUseCase;
 import lombok.AllArgsConstructor;
 

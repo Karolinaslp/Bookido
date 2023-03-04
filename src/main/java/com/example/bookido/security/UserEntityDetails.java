@@ -1,6 +1,6 @@
 package com.example.bookido.security;
 
-import com.example.bookido.user.domain.UserEntity;
+import com.example.bookido.users.domain.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

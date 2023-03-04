@@ -22,6 +22,10 @@
         <postgresql.version>42.2.19.jre7</postgresql.version>
         <springdoc.version>1.6.9</springdoc.version>
         <opencsv.version>5.3</opencsv.version>
+        <spring-web.version>5.3.23</spring-web.version>
+        <junit-vintage-engine.version>5.8.2</junit-vintage-engine.version>
+        <h2.version>2.1.214</h2.version>
+        <spring-boot-starter-web.version>2.7.3</spring-boot-starter-web.version>
     </properties>
 
     <dependencies>
@@ -75,12 +79,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.7.3</version>
+            <version>${spring-boot-starter-web.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>5.3.23</version>
+            <version>${spring-web.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -90,7 +94,7 @@
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.8.2</version>
+            <version>${junit-vintage-engine.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -114,7 +118,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.214</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
