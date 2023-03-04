@@ -2,7 +2,7 @@
 
 
 # Bookido
-Bookido is a RESTful web service built using Spring Boot, Hibernate, Maven, Lombok, PostgreSQL, JUnit5, and CircleCI. This web service provides endpoints for registering users, managing book orders, updating book information, and uploading book covers.
+Bookido is a REST web service built using Spring Boot, Hibernate, Maven, Lombok, PostgreSQL, JUnit5, and CircleCI. This web service provides endpoints for registering users, managing book orders, updating book information, and uploading book covers.
 
 ## Table of Contents
 * [General Info](#general-information)
