@@ -18,7 +18,7 @@ Bookido is a REST web service built using Spring Boot, Hibernate, Maven, Lombok,
 
 
 ## General Information
-- Bookstore online REST application that was build along with the "School of Spring" course. 
+- Bookstore online REST application. 
 - Backend service for managing administration of the store.
 - Created for learning purposes to extend my knowledge of the Spring framework.
 
